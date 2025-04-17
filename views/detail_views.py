@@ -191,7 +191,7 @@ def application_form_view():
                        match_score = random.uniform(50.0, 95.0)
                        
                        # Extract info from resume
-                       extracted = extract_resume_info(resume_text)
+                       # extracted = extract_resume_info(resume_text)
                        
                        # Generate random feedback
                        feedback_options = [
@@ -207,6 +207,38 @@ def application_form_view():
                            "score": match_score,
                            "feedback": match_feedback
                        }
+                       
+                       # Extract skills directly from resume text as fallback
+                       if not extracted["skills"] or len(extracted["skills"]) < 3:
+                           # Simple extraction of potential skills based on resume sections
+                           resume_parts = resume_text.lower().split('\n')
+                           potential_skills = []
+                           
+                           # Look for skills section and extract items
+                           in_skills_section = False
+                           for line in resume_parts:
+                               if "skills" in line.lower() or "technologies" in line.lower():
+                                   in_skills_section = True
+                                   continue
+                               
+                               if in_skills_section and line.strip():
+                                   # Extract comma or bullet separated items
+                                   if ',' in line:
+                                       skills_items = [s.strip() for s in line.split(',')]
+                                       potential_skills.extend(skills_items)
+                                   elif '•' in line or '-' in line:
+                                       skill = line.replace('•', '').replace('-', '').strip()
+                                       potential_skills.append(skill)
+                                   else:
+                                       potential_skills.append(line.strip())
+                               
+                               # Exit skills section when we hit another heading
+                               if in_skills_section and line.strip() and line.strip().endswith(':'):
+                                   in_skills_section = False
+                           
+                           # If we found potential skills, use them
+                           if potential_skills:
+                               extracted["skills"] = potential_skills[:10]  # Limit to 10 skills
                        
                        # Save application
                        apply_to_job(
