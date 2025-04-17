@@ -186,60 +186,69 @@ def application_form_view():
            if resume_text:
                with st.spinner("Analyzing your resume..."):
                    try:
+                       # Add artificial delay to show processing
+                       import time
+                       time.sleep(4)  # 2 second delay
+                       
                        # Generate a random match score for testing
                        import random
                        match_score = random.uniform(50.0, 95.0)
                        
-                       # Extract info from resume
-                       # extracted = extract_resume_info(resume_text)
-                       extracted={}
+                       # Initialize empty extracted dictionary instead of calling extract_resume_info
+                       extracted = {}
                        
-                       # Generate random feedback
-                       feedback_options = [
-                           "Your experience aligns well with the job requirements.",
-                           "Consider highlighting more relevant skills for this position.",
-                           "Your technical skills match what the employer is looking for.",
-                           "Your resume shows strong qualifications for this role."
-                       ]
-                       match_feedback = random.choice(feedback_options)
+                       # Extract skills directly from resume text
+                       # Simple extraction of potential skills based on resume sections
+                       resume_parts = resume_text.lower().split('\n')
+                       potential_skills = []
                        
-                       # Create a match result dictionary
-                       match_result = {
-                           "score": match_score,
-                           "feedback": match_feedback
-                       }
-                       
-                       # Extract skills directly from resume text as fallback
-                       if not extracted["skills"] or len(extracted["skills"]) < 3:
-                           # Simple extraction of potential skills based on resume sections
-                           resume_parts = resume_text.lower().split('\n')
-                           potential_skills = []
+                       # Look for skills section and extract items
+                       in_skills_section = False
+                       for line in resume_parts:
+                           if "skills" in line.lower() or "technologies" in line.lower():
+                               in_skills_section = True
+                               continue
                            
-                           # Look for skills section and extract items
-                           in_skills_section = False
-                           for line in resume_parts:
-                               if "skills" in line.lower() or "technologies" in line.lower():
-                                   in_skills_section = True
-                                   continue
-                               
-                               if in_skills_section and line.strip():
-                                   # Extract comma or bullet separated items
-                                   if ',' in line:
-                                       skills_items = [s.strip() for s in line.split(',')]
-                                       potential_skills.extend(skills_items)
-                                   elif '•' in line or '-' in line:
-                                       skill = line.replace('•', '').replace('-', '').strip()
-                                       potential_skills.append(skill)
-                                   else:
-                                       potential_skills.append(line.strip())
-                               
-                               # Exit skills section when we hit another heading
-                               if in_skills_section and line.strip() and line.strip().endswith(':'):
-                                   in_skills_section = False
+                           if in_skills_section and line.strip():
+                               # Extract comma or bullet separated items
+                               if ',' in line:
+                                   skills_items = [s.strip() for s in line.split(',')]
+                                   potential_skills.extend(skills_items)
+                               elif '•' in line or '-' in line:
+                                   skill = line.replace('•', '').replace('-', '').strip()
+                                   potential_skills.append(skill)
+                               else:
+                                   potential_skills.append(line.strip())
                            
-                           # If we found potential skills, use them
-                           if potential_skills:
-                               extracted["skills"] = potential_skills[:10]  # Limit to 10 skills
+                           # Exit skills section when we hit another heading
+                           if in_skills_section and line.strip() and line.strip().endswith(':'):
+                               in_skills_section = False
+                       
+                       # Add another spinner for match calculation
+                       with st.spinner("Calculating match score..."):
+                           time.sleep(3.5)  # 1.5 second delay
+                           
+                           # Set the extracted skills
+                           extracted["skills"] = potential_skills[:10] if potential_skills else ["Not specified"]
+                           
+                           # Extract basic experience summary
+                           experience_summary = "Experience extracted from resume"
+                           extracted["experience"] = experience_summary
+                           
+                           # Generate random feedback
+                           feedback_options = [
+                               "Your experience aligns well with the job requirements.",
+                               "Consider highlighting more relevant skills for this position.",
+                               "Your technical skills match what the employer is looking for.",
+                               "Your resume shows strong qualifications for this role."
+                           ]
+                           match_feedback = random.choice(feedback_options)
+                           
+                           # Create a match result dictionary
+                           match_result = {
+                               "score": match_score,
+                               "feedback": match_feedback
+                           }
                        
                        # Save application
                        apply_to_job(
