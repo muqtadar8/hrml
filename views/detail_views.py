@@ -265,31 +265,31 @@ def application_form_view():
                         # Display results
                         st.success("✅ Application submitted successfully!")
                         
-                        col1, col2 = st.columns(2)
+                        # col1, col2 = st.columns(2)
                         
-                        with col1:
-                            st.subheader("Extracted Skills")
-                            st.write(extracted["skills"])
+                        # with col1:
+                        #     st.subheader("Extracted Skills")
+                        #     st.write(extracted["skills"])
                             
-                            st.subheader("Experience Summary")
-                            st.write(extracted["experience"])
+                        #     st.subheader("Experience Summary")
+                        #     st.write(extracted["experience"])
                         
-                        with col2:
-                            st.subheader("Match Analysis")
+                        # with col2:
+                        #     st.subheader("Match Analysis")
                             
-                            # Create a color based on the match score
-                            if match_result["score"] >= 80:
-                                color = "green"
-                                emoji = "🌟"
-                            elif match_result["score"] >= 60:
-                                color = "orange"
-                                emoji = "⭐"
-                            else:
-                                color = "red" 
-                                emoji = "⚠️"
+                        #     # Create a color based on the match score
+                        #     if match_result["score"] >= 80:
+                        #         color = "green"
+                        #         emoji = "🌟"
+                        #     elif match_result["score"] >= 60:
+                        #         color = "orange"
+                        #         emoji = "⭐"
+                        #     else:
+                        #         color = "red" 
+                        #         emoji = "⚠️"
                                 
-                            st.markdown(f"<h3 style='color:{color}'>{emoji} Match Score: {match_result['score']:.1f}%</h3>", unsafe_allow_html=True)
-                            st.write(match_result["feedback"])
+                            # st.markdown(f"<h3 style='color:{color}'>{emoji} Match Score: {match_result['score']:.1f}%</h3>", unsafe_allow_html=True)
+                            # st.write(match_result["feedback"])
                         
                         # Option to go back to job list
                         if st.button("Back to Job Listings"):
