@@ -164,7 +164,7 @@ def my_applications_view():
                 st.info("No applications in this category.")
             else:
                 for app in display_apps:
-                    with st.expander(f"{app[1]} - {display_application_status(app[6])}", unsafe_allow_html=True):
+                    with st.expander(f"{app[1]} - {display_application_status(app[6])}"):
                         col1, col2 = st.columns(2)
                         
                         with col1:
