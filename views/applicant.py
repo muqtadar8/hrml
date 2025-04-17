@@ -124,83 +124,76 @@ def my_applications_view():
     
     if not applications:
         st.info("You haven't applied to any jobs yet. Browse available jobs to start applying.")
-    else:
-        st.write(f"You have applied to {len(applications)} job(s)")
-        
-        # Group by status for a dashboard view
-        status_counts = {}
-        for app in applications:
-            status = app[6]
-            status_counts[status] = status_counts.get(status, 0) + 1
-        
-        # Create a horizontal bar chart for statuses
-        status_data = pd.DataFrame({
-            'Status': list(status_counts.keys()),
-            'Count': list(status_counts.values())
-        })
-        # Check if we have status data
-        if not status_data.empty:
-            status_chart = alt.Chart(status_data).mark_bar().encode(
-                x='Count:Q',
-                y=alt.Y('Status:N', sort='-x'),
-                color=alt.Color('Status:N', scale=alt.Scale(
-                    domain=['Pending', 'Interview', 'Accepted', 'Rejected'],
-                    range=['#FF9800', '#2196F3', '#4CAF50', '#F44336']
-                )),
-                tooltip=['Status', 'Count']
-            ).properties(
-                width=300,
-                height=150
-            )
-            
-            st.altair_chart(status_chart, use_container_width=True)
-        
-        # Create tabs for different statuses
-        status_tabs = st.tabs(["All Applications", "Pending", "Interview", "Accepted", "Rejected"])
-        
-        with status_tabs[0]:
-            display_apps = applications
+        return
+    
+    st.write(f"You have applied to {len(applications)} job(s)")
+    
+    # Group by status for a dashboard view
+    status_counts = {}
+    for app in applications:
+        status = app[6]
+        status_counts[status] = status_counts.get(status, 0) + 1
+    
+    # Create a horizontal bar chart for statuses
+    status_data = pd.DataFrame({
+        'Status': list(status_counts.keys()),
+        'Count': list(status_counts.values())
+    })
+    if not status_data.empty:
+        status_chart = alt.Chart(status_data).mark_bar().encode(
+            x='Count:Q',
+            y=alt.Y('Status:N', sort='-x'),
+            color=alt.Color('Status:N', scale=alt.Scale(
+                domain=['Pending', 'Interview', 'Accepted', 'Rejected'],
+                range=['#FF9800', '#2196F3', '#4CAF50', '#F44336']
+            )),
+            tooltip=['Status', 'Count']
+        ).properties(
+            width=300,
+            height=150
+        )
+        st.altair_chart(status_chart, use_container_width=True)
+    
+    # Create tabs for different statuses
+    status_tabs = st.tabs(["All Applications", "Pending", "Interview", "Accepted", "Rejected"])
+    
+    # ---- All Applications Tab ----
+    with status_tabs[0]:
+        display_apps = applications
+        if not display_apps:
+            st.info("No applications in this category.")
+        else:
+            for idx, app in enumerate(display_apps):
+                with st.markdown(f"{app[1]} - {display_application_status(app[6])}", unsafe_allow_html=True):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.markdown(f"**Employer:** {app[2]}")
+                        st.markdown(f"**Applied:** {app[5].split()[0] if app[5] else 'N/A'}")
+                        if st.button("View Job Details", key=f"view_job_all_{app[7]}_{idx}"):
+                            st.session_state.view_job = app[7]
+                            st.rerun()
+                    with col2:
+                        st.markdown(f"**Match Score:** {display_match_score(app[3])}", unsafe_allow_html=True)
+                        st.markdown("**Match Analysis:**")
+                        st.write(app[4])
+    
+    # ---- Status-Specific Tabs ----
+    for i, status in enumerate(["Pending", "Interview", "Accepted", "Rejected"]):
+        with status_tabs[i + 1]:
+            display_apps = [app for app in applications if app[6] == status]
             if not display_apps:
-                st.info("No applications in this category.")
+                st.info(f"No applications with status: {status}")
             else:
-                for app in display_apps:
-                    with st.markdown(f"{app[1]} - {display_application_status(app[6])}", unsafe_allow_html=True):
+                for idx, app in enumerate(display_apps):
+                    with st.expander(f"{app[1]} - {app[2]}"):
                         col1, col2 = st.columns(2)
-                        
                         with col1:
-                            st.markdown(f"**Employer:** {app[2]}")
                             st.markdown(f"**Applied:** {app[5].split()[0] if app[5] else 'N/A'}")
-                            
-                            # Add view job button
-                            if st.button("View Job Details", key=f"view_job_{app[7]}"):
+                            if st.button("View Job Details", key=f"view_job_status_{status}_{app[7]}_{idx}"):
                                 st.session_state.view_job = app[7]
                                 st.rerun()
-                        
                         with col2:
                             st.markdown(f"**Match Score:** {display_match_score(app[3])}", unsafe_allow_html=True)
                             st.markdown("**Match Analysis:**")
                             st.write(app[4])
-        
-        # Filter applications by status for the remaining tabs
-        for i, status in enumerate(["Pending", "Interview", "Accepted", "Rejected"]):
-            with status_tabs[i+1]:
-                display_apps = [app for app in applications if app[6] == status]
-                if not display_apps:
-                    st.info(f"No applications with status: {status}")
-                else:
-                    for app in display_apps:
-                        with st.expander(f"{app[1]} - {app[2]}"):
-                            col1, col2 = st.columns(2)
-                            
-                            with col1:
-                                st.markdown(f"**Applied:** {app[5].split()[0] if app[5] else 'N/A'}")
-                                
-                                # Add view job button
-                                if st.button("View Job Details", key=f"view_job_status_{app[7]}_{i}"):
-                                    st.session_state.view_job = app[7]
-                                    st.rerun()
-                            
-                            with col2:
-                                st.markdown(f"**Match Score:** {display_match_score(app[3])}", unsafe_allow_html=True)
-                                st.markdown("**Match Analysis:**")
-                                st.write(app[4])
+
