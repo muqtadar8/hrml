@@ -192,6 +192,7 @@ def application_form_view():
                        
                        # Extract info from resume
                        # extracted = extract_resume_info(resume_text)
+                       extracted={}
                        
                        # Generate random feedback
                        feedback_options = [
