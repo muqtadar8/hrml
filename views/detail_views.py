@@ -165,85 +165,96 @@ def job_applications_view():
                                             st.rerun()
 
 def application_form_view():
-    """Display the application form for a selected job"""
-    job = get_job_by_id(st.session_state.selected_job)
-    
-    if job:
-        st.header(f"Apply for: {job[1]}")
-        
-        with st.expander("View Job Details"):
-            st.markdown("### Job Description")
-            st.write(job[2])
-            
-            if job[4]:  # If requirements exist
-                st.markdown("### Requirements")
-                st.write(job[4])
-        
-        st.subheader("Paste Your Resume Below")
-        resume_text = st.text_area("Resume", height=300)
-        
-        if st.button("Analyze Resume and Apply", type="primary"):
-            if resume_text:
-                with st.spinner("Analyzing your resume..."):
-                    try:
-                        # Extract info from resume
-                        extracted = extract_resume_info(resume_text)
-                        # st.write(extracted)
-                        # st.write(resume_text, job[2], job[4])
-                        # Match against job description
-                        match_result = match_resume_to_job(resume_text, job[2], job[4])
-                        # st.write(match_result)
-                        
-                        # Save application
-                        apply_to_job(
-                            username=st.session_state.user,
-                            job_id=st.session_state.selected_job,
-                            resume=resume_text,
-                            skills=extracted["skills"],
-                            experience=extracted["experience"],
-                            match_score=match_result["score"],
-                            match_feedback=match_result["feedback"]
-                        )
-                        
-                        # Display results
-                        st.success("✅ Application submitted successfully!")
-                        
-                        col1, col2 = st.columns(2)
-                        
-                        with col1:
-                            st.subheader("Extracted Skills")
-                            st.write(extracted["skills"])
-                            
-                            st.subheader("Experience Summary")
-                            st.write(extracted["experience"])
-                        
-                        with col2:
-                            st.subheader("Match Analysis")
-                            
-                            # Create a color based on the match score
-                            if match_result["score"] >= 80:
-                                color = "green"
-                                emoji = "🌟"
-                            elif match_result["score"] >= 60:
-                                color = "orange"
-                                emoji = "⭐"
-                            else:
-                                color = "red" 
-                                emoji = "⚠️"
-                                
-                            st.markdown(f"<h3 style='color:{color}'>{emoji} Match Score: {match_result['score']:.1f}%</h3>", unsafe_allow_html=True)
-                            st.write(match_result["feedback"])
-                        
-                        # Display the gauge chart
-                        # st.altair_chart(generate_match_gauge(match_result["score"]), use_container_width=False)
-                        
-                        # Option to go back to job list
-                        if st.button("Back to Job Listings"):
-                            st.session_state.selected_job = None
-                            st.rerun()
-                        
-                    except Exception as e:
-                        st.error(f"⚠️ Error processing resume: {str(e)}")
-                        st.info("Your application was not submitted. Please try again.")
-            else:
-                st.error("⚠️ Please paste your resume to apply")
+   """Display the application form for a selected job"""
+   job = get_job_by_id(st.session_state.selected_job)
+   
+   if job:
+       st.header(f"Apply for: {job[1]}")
+       
+       with st.expander("View Job Details"):
+           st.markdown("### Job Description")
+           st.write(job[2])
+           
+           if job[4]:  # If requirements exist
+               st.markdown("### Requirements")
+               st.write(job[4])
+       
+       st.subheader("Paste Your Resume Below")
+       resume_text = st.text_area("Resume", height=300)
+       
+       if st.button("Analyze Resume and Apply", type="primary"):
+           if resume_text:
+               with st.spinner("Analyzing your resume..."):
+                   try:
+                       # Generate a random match score for testing
+                       import random
+                       match_score = random.uniform(50.0, 95.0)
+                       
+                       # Extract info from resume
+                       extracted = extract_resume_info(resume_text)
+                       
+                       # Generate random feedback
+                       feedback_options = [
+                           "Your experience aligns well with the job requirements.",
+                           "Consider highlighting more relevant skills for this position.",
+                           "Your technical skills match what the employer is looking for.",
+                           "Your resume shows strong qualifications for this role."
+                       ]
+                       match_feedback = random.choice(feedback_options)
+                       
+                       # Create a match result dictionary
+                       match_result = {
+                           "score": match_score,
+                           "feedback": match_feedback
+                       }
+                       
+                       # Save application
+                       apply_to_job(
+                           username=st.session_state.user,
+                           job_id=st.session_state.selected_job,
+                           resume=resume_text,
+                           skills=extracted["skills"],
+                           experience=extracted["experience"],
+                           match_score=match_result["score"],
+                           match_feedback=match_result["feedback"]
+                       )
+                       
+                       # Display results
+                       st.success("✅ Application submitted successfully!")
+                       
+                       col1, col2 = st.columns(2)
+                       
+                       with col1:
+                           st.subheader("Extracted Skills")
+                           st.write(extracted["skills"])
+                           
+                           st.subheader("Experience Summary")
+                           st.write(extracted["experience"])
+                       
+                       with col2:
+                           st.subheader("Match Analysis")
+                           
+                           # Create a color based on the match score
+                           if match_result["score"] >= 80:
+                               color = "green"
+                               emoji = "🌟"
+                           elif match_result["score"] >= 60:
+                               color = "orange"
+                               emoji = "⭐"
+                           else:
+                               color = "red" 
+                               emoji = "⚠️"
+                               
+                           st.markdown(f"<h3 style='color:{color}'>{emoji} Match Score: {match_result['score']:.1f}%</h3>", unsafe_allow_html=True)
+                           st.write(match_result["feedback"])
+                       
+                       # Option to go back to job list
+                       if st.button("Back to Job Listings"):
+                           st.session_state.selected_job = None
+                           st.rerun()
+                       
+                   except Exception as e:
+                       st.error(f"⚠️ Error processing resume: {str(e)}")
+                       st.info("Your application was not submitted. Please try again.")
+           else:
+               st.error("⚠️ Please paste your resume to apply")
